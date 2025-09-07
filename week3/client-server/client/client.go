@@ -44,7 +44,7 @@ func main() {
 		if text == "quit\n" {
 			return
 		}
-		fmt.Fprintf(conn, text)
+		fmt.Fprintf(conn, "%s", text)
 
 	}
 }
