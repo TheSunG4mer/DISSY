@@ -25,6 +25,7 @@ func print_incomming() {
 
 func main() {
 	reader := bufio.NewReader(os.Stdin)
+	fmt.Printf("Input ip address and port number (addr:port): ")
 	ip_port, err := reader.ReadString('\n')
 	if err != nil {
 		return
