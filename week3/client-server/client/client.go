@@ -28,10 +28,15 @@ func main() {
 	fmt.Printf("Input ip address and port number (addr:port): ")
 	ip_port, err := reader.ReadString('\n')
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
 	ip_port = strings.TrimSpace(ip_port)
-	conn, _ = net.Dial("tcp", ip_port) //"127.0.0.1:9000"
+	conn, err = net.Dial("tcp", ip_port) //"127.0.0.1:9000"
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	defer conn.Close()
 	go print_incomming()
 
