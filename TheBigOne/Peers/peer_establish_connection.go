@@ -18,7 +18,7 @@ func (p *Peer) Connect(addr string, port int) error {
 	} else if err != nil {
 		return err
 	}
-	sendMessage(conn, Message{}) // placeholder to get rid of errors.
+	SendMessage(conn, Message{}) // placeholder to get rid of errors.
 
 	return nil
 }

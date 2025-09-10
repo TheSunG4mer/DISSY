@@ -39,3 +39,11 @@ func (p *Peer) GetLedger() *Ledger {
 func (p *Peer) ApplyTransaction(t *Transaction) {
 	p.Ledger.TranferMoney(t)
 }
+
+func (p *Peer) GeneratePeerInfo() *PeerInfo {
+	pi := new(PeerInfo)
+	pi.ID = p.ID
+	pi.IP = p.IP
+	pi.Port = p.Port
+	return pi
+}
