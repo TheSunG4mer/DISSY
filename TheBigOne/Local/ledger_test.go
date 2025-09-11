@@ -1,13 +1,12 @@
-package peers_test
+package Local
 
 import (
-	peers "P2P_block_chain/Peers"
 	"testing"
 )
 
 func TestLedger_TranferMoney(t *testing.T) {
 
-	l := peers.MakeLedger()
+	l := MakeLedger()
 	l.AddParticipant("John")
 	l.AddParticipant("Dave")
 	l.AddParticipant("Michael")
@@ -25,7 +24,7 @@ func TestLedger_TranferMoney(t *testing.T) {
 		t.Errorf("No error encounted reading from non-existing account")
 	}
 
-	transaction := peers.MakeTransaction("1", "John", "Dave", 50)
+	transaction := MakeTransaction("1", "John", "Dave", 50)
 	l.TranferMoney(transaction)
 
 	john_balance, er = l.GetBalance("John")

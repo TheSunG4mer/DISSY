@@ -1,6 +1,7 @@
-package peers
+package Marshalling
 
 import (
+	"Local"
 	"encoding/json"
 	"net"
 )
@@ -38,7 +39,7 @@ func MarshalStringToMessage(s string) Message {
 	return msg
 }
 
-func MarshalTransactionToMessage(t *Transaction) Message {
+func MarshalTransactionToMessage(t *Local.Transaction) Message {
 	msg := Message{
 		Type:    MessageTransaction,
 		Content: tryMarshal(t),
@@ -46,7 +47,7 @@ func MarshalTransactionToMessage(t *Transaction) Message {
 	return msg
 }
 
-func MarshalPeerInfoToMessage(pi *PeerInfo) Message {
+func MarshalPeerInfoToMessage(pi *Local.PeerInfo) Message {
 	msg := Message{
 		Type:    MessagePeerInfo,
 		Content: tryMarshal(&pi),
@@ -54,7 +55,7 @@ func MarshalPeerInfoToMessage(pi *PeerInfo) Message {
 	return msg
 }
 
-func MarshalLedgerToMessage(l *Ledger) Message {
+func MarshalLedgerToMessage(l *Local.Ledger) Message {
 	msg := Message{
 		Type:    MessageLedger,
 		Content: tryMarshal(&l),
@@ -68,20 +69,20 @@ func DemarshalToString(rawMessage json.RawMessage) string {
 	return s
 }
 
-func DemarshalToTransaction(rawMessage json.RawMessage) *Transaction {
-	var t Transaction
+func DemarshalToTransaction(rawMessage json.RawMessage) *Local.Transaction {
+	var t Local.Transaction
 	json.Unmarshal(rawMessage, &t)
 	return &t
 }
 
-func DemarshalToPeerInfo(rawMessage json.RawMessage) *PeerInfo {
-	var pi PeerInfo
+func DemarshalToPeerInfo(rawMessage json.RawMessage) *Local.PeerInfo {
+	var pi Local.PeerInfo
 	json.Unmarshal(rawMessage, &pi)
 	return &pi
 }
 
-func DemarshalToLedger(rawMessage json.RawMessage) *Ledger {
-	var l Ledger
+func DemarshalToLedger(rawMessage json.RawMessage) *Local.Ledger {
+	var l Local.Ledger
 	json.Unmarshal(rawMessage, &l)
 	return &l
 }
@@ -99,20 +100,19 @@ func SendString(conn net.Conn, s string) error {
 	return SendMessage(conn, MarshalStringToMessage(s))
 }
 
-func SendTransaction(conn net.Conn, t *Transaction) error {
+func SendTransaction(conn net.Conn, t *Local.Transaction) error {
 	return SendMessage(conn, MarshalTransactionToMessage(t))
 }
 
-func SendPeerInfo(conn net.Conn, pi *PeerInfo) error {
+func SendPeerInfo(conn net.Conn, pi *Local.PeerInfo) error {
 	return SendMessage(conn, MarshalPeerInfoToMessage(pi))
 }
 
-func SendLedger(conn net.Conn, l *Ledger) error {
+func SendLedger(conn net.Conn, l *Local.Ledger) error {
 	return SendMessage(conn, MarshalLedgerToMessage(l))
 }
 
-func RecieveMessage(conn net.Conn) (*Message, error) {
-	dec := json.NewDecoder(conn)
+func RecieveMessage(dec *json.Decoder) (*Message, error) {
 	m := &Message{}
 	err := dec.Decode(m)
 	return m, err

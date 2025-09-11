@@ -1,7 +1,10 @@
-package peers_test
+package Marshalling
 
 import (
-	peers "P2P_block_chain/Peers"
+	"Local"
+	"encoding/json"
+
+	// "Network"
 	"net"
 	"testing"
 )
@@ -18,10 +21,10 @@ func TestDemarshalToString(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rawMessage := peers.MarshalStringToMessage(tt.original_input)
+			rawMessage := MarshalStringToMessage(tt.original_input)
 			var got string
-			if rawMessage.Type == peers.MessageString {
-				got = peers.DemarshalToString(rawMessage.Content)
+			if rawMessage.Type == MessageString {
+				got = DemarshalToString(rawMessage.Content)
 			} else {
 				t.Errorf("Did not detect string")
 				got = tt.want
@@ -38,17 +41,17 @@ func TestDemarshalToTransaction(t *testing.T) {
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.
-		t    *peers.Transaction
-		want *peers.Transaction
+		t    *Local.Transaction
+		want *Local.Transaction
 	}{
-		{name: "Normal Transaction", t: peers.MakeTransaction("123", "Bob", "Mike", 10), want: peers.MakeTransaction("123", "Bob", "Mike", 10)},
+		{name: "Normal Transaction", t: Local.MakeTransaction("123", "Bob", "Mike", 10), want: Local.MakeTransaction("123", "Bob", "Mike", 10)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rawMessage := peers.MarshalTransactionToMessage(tt.t)
-			var got *peers.Transaction
-			if rawMessage.Type == peers.MessageTransaction {
-				got = peers.DemarshalToTransaction(rawMessage.Content)
+			rawMessage := MarshalTransactionToMessage(tt.t)
+			var got *Local.Transaction
+			if rawMessage.Type == MessageTransaction {
+				got = DemarshalToTransaction(rawMessage.Content)
 			} else {
 				t.Errorf("Did not detect transaction")
 				got = tt.want
@@ -62,33 +65,32 @@ func TestDemarshalToTransaction(t *testing.T) {
 }
 
 func TestDemarshalToPeerInfo(t *testing.T) {
-	p := peers.MakePeer("Alice", "127.0.0.1", 1234)
-	pi := p.GeneratePeerInfo()
-	rawMessage := peers.MarshalPeerInfoToMessage(pi)
-	if rawMessage.Type != peers.MessagePeerInfo {
+	pi := Local.PeerInfo{ID: "Alice", IP: "127.0.0.1", Port: 1234}
+	rawMessage := MarshalPeerInfoToMessage(&pi)
+	if rawMessage.Type != MessagePeerInfo {
 		t.Errorf("Did not detect PeerInfo")
 		return
 	}
-	got := peers.DemarshalToPeerInfo(rawMessage.Content)
+	got := DemarshalToPeerInfo(rawMessage.Content)
 	if got.ID != pi.ID || got.IP != pi.IP || got.Port != pi.Port {
 		t.Errorf("Did not get the right peers back")
 	}
 }
 
 func TestDemarshalToLedger(t *testing.T) {
-	L := peers.MakeLedger()
+	L := Local.MakeLedger()
 	L.AddParticipant("Mike")
 	L.AddParticipant("John")
-	trans := peers.MakeTransaction("123", "Mike", "John", 30)
+	trans := Local.MakeTransaction("123", "Mike", "John", 30)
 	L.TranferMoney(trans)
 
-	rawMessage := peers.MarshalLedgerToMessage(L)
+	rawMessage := MarshalLedgerToMessage(L)
 
-	if rawMessage.Type != peers.MessageLedger {
+	if rawMessage.Type != MessageLedger {
 		t.Errorf("Did not detect Ledger")
 		return
 	}
-	got := peers.DemarshalToLedger(rawMessage.Content)
+	got := DemarshalToLedger(rawMessage.Content)
 	johnNewBalance, _ := got.GetBalance("John")
 	mikeNewBalance, _ := got.GetBalance("Mike")
 	if johnNewBalance != 30 || mikeNewBalance != -30 {
@@ -102,18 +104,22 @@ func helperToTestSendingMessageOverNetwork(t *testing.T) {
 		t.Errorf("Error during testing")
 		return
 	}
-	peers.SendString(conn, "message")
-	p := peers.MakePeer("Mads", "127.0.0.1", 1234)
-	peers.SendPeerInfo(conn, p.GeneratePeerInfo())
-	peers.SendTransaction(conn, peers.MakeTransaction("123", "Mike", "John", 10))
+	SendString(conn, "message")
+	t.Log("String sent")
+	p := Local.PeerInfo{ID: "Mads", IP: "127.0.0.1", Port: 1234}
+	SendPeerInfo(conn, &p)
+	t.Log("PeerInfo sent")
+	SendTransaction(conn, Local.MakeTransaction("123", "Mike", "John", 10))
+	t.Log("Transaction sent")
 
-	L := peers.MakeLedger()
+	L := Local.MakeLedger()
 	L.AddParticipant("Mike")
 	L.AddParticipant("John")
-	trans := peers.MakeTransaction("123", "Mike", "John", 30)
+	trans := Local.MakeTransaction("123", "Mike", "John", 30)
 	L.TranferMoney(trans)
 
-	peers.SendLedger(conn, L)
+	SendLedger(conn, L)
+	t.Log("Ledger sent")
 
 }
 
@@ -125,43 +131,48 @@ func TestSendingMessageOverNetwork(t *testing.T) {
 	}
 	defer listener.Close()
 	go helperToTestSendingMessageOverNetwork(t)
+	t.Log("Started client")
 	conn, er := listener.Accept()
 	if er != nil {
 		t.Errorf("Error during testing")
 		return
 	}
+	t.Log("Connected to client")
+	dec := json.NewDecoder(conn)
 	for i := 0; i < 4; i++ {
-		m, er := peers.RecieveMessage(conn)
+		m, er := RecieveMessage(dec)
 		if er != nil {
 			t.Errorf("Error during testing")
 			return
 		}
 		switch m.Type {
-		case peers.MessageString:
-			s := peers.DemarshalToString(m.Content)
+		case MessageString:
+			s := DemarshalToString(m.Content)
 			if s != "message" {
 				t.Errorf("Recieved wrong string")
 			}
-		case peers.MessagePeerInfo:
-			pi := peers.DemarshalToPeerInfo(m.Content)
+			t.Log("Recieved String")
+		case MessagePeerInfo:
+			pi := DemarshalToPeerInfo(m.Content)
 			if pi.ID != "Mads" || pi.IP != "127.0.0.1" || pi.Port != 1234 {
 				t.Errorf("Recieved wrong PeerInfo")
 			}
-		case peers.MessageTransaction:
-			trans := peers.DemarshalToTransaction(m.Content)
+			t.Log("Recieved PeerInfo")
+		case MessageTransaction:
+			trans := DemarshalToTransaction(m.Content)
 			if trans.ID != "123" || trans.From != "Mike" ||
 				trans.To != "John" || trans.Amount != 10 {
 				t.Errorf("Recieved wrong Transaction")
 			}
-		case peers.MessageLedger:
-			l := peers.DemarshalToLedger(m.Content)
+			t.Log("Recieved Transaction")
+		case MessageLedger:
+			l := DemarshalToLedger(m.Content)
 			mikeBalance, _ := l.GetBalance("Mike")
 			johnBalance, _ := l.GetBalance("John")
 			if mikeBalance != -30 || johnBalance != 30 {
 				t.Errorf("Recieved wrong Ledger")
 			}
-
+			t.Log("Recieved Ledger")
 		}
 	}
-
 }

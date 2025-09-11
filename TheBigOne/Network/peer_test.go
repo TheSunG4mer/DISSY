@@ -1,7 +1,6 @@
-package peers_test
+package Network
 
 import (
-	peers "P2P_block_chain/Peers"
 	"testing"
 )
 
@@ -18,7 +17,7 @@ func TestPeer_GetName(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := peers.MakePeer(tt.id, tt.ip, tt.port)
+			p := MakePeer(tt.id, tt.ip, tt.port)
 			got := p.GetName()
 			if got != tt.want {
 				t.Errorf("GetName() = %v, want %v", got, tt.want)
@@ -39,7 +38,7 @@ func TestPeer_GetMessageCounter(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := peers.MakePeer(tt.id, tt.ip, tt.port)
+			p := MakePeer(tt.id, tt.ip, tt.port)
 			got := p.GetMessageCounter()
 			if got != tt.want {
 				t.Errorf("GetMessageCounter() = %v, want %v", got, tt.want)
@@ -49,7 +48,7 @@ func TestPeer_GetMessageCounter(t *testing.T) {
 }
 
 func TestPeer_BumpMessageCounter(t *testing.T) {
-	p := peers.MakePeer("Andrew", "127.0.0.1", 1234)
+	p := MakePeer("Andrew", "127.0.0.1", 1234)
 	mc := p.BumpMessageCounter()
 	if mc != 0 {
 		t.Errorf("BumpMessageCounter() = %v, want %v", mc, 0)

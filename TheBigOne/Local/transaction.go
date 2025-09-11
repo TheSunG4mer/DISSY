@@ -1,4 +1,4 @@
-package peers
+package Local
 
 type Transaction struct {
 	ID     string
