@@ -76,3 +76,7 @@ func (p *Peer) SetLedger(l *Ledger) {
 func (p *Peer) AddPeer(pi *PeerInfo) {
 	p.OtherPeers = append(p.OtherPeers, pi)
 }
+
+func (p *Peer) AddConnection(conn net.Conn) {
+	p.Connections = append(p.Connections, conn)
+}

@@ -65,6 +65,7 @@ func (p *Peer) Connect(addr string, port int) error {
 			return err
 		}
 		SendPeerInfo(conn, p.GeneratePeerInfo())
+		p.AddConnection(conn)
 		p.ListenToPort(conn)
 	}
 	return p.ListenForNewPeers()
@@ -83,6 +84,7 @@ func (p *Peer) ListenForNewPeers() error {
 		if err != nil {
 			return err
 		}
+		p.AddConnection(conn)
 		go p.ListenToPort(conn)
 	}
 }

@@ -40,7 +40,9 @@ func (p *Peer) AcceptTransactions() {
 	var t *Transaction
 	for {
 		t = <-p.TransactionChannel
+		p.MasterLock.Lock()
 		p.Ledger.TranferMoney(t)
+		p.MasterLock.Unlock()
 	}
 }
 
@@ -48,7 +50,9 @@ func (p *Peer) AcceptNewConnections() {
 	var pi *PeerInfo
 	for {
 		pi = <-p.PeerInfoChannel
+		p.MasterLock.Lock()
 		p.AddPeer(pi)
+		p.MasterLock.Unlock()
 	}
 }
 
