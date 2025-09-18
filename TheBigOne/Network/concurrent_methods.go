@@ -46,7 +46,7 @@ func (p *Peer) AcceptTransactions() {
 	for {
 		t = <-p.TransactionChannel
 		p.MasterLock.Lock()
-		p.Ledger.TranferMoney(t)
+		p.ApplyTransaction(t)
 		p.MasterLock.Unlock()
 	}
 }
