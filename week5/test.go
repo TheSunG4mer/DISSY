@@ -1,13 +1,14 @@
 package main
 
 import (
-	"fmt"
-	"math/big"
+	"os"
 )
 
 func main() {
-	a, b := big.NewInt(3), big.NewInt(2)
-	c := big.NewInt(0)
-	c.Mul(a, b)
-	fmt.Println(c)
+	fi, err := os.Open("C:/Users/au649790/OneDrive - Aarhus universitet/Desktop/DISSY/week5/test.txt")
+	if err != nil {
+		panic(err)
+	}
+
+	fi.Close()
 }
