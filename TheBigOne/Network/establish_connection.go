@@ -14,6 +14,7 @@ func (p *Peer) Connect(addr string, port int) error {
 	go p.AcceptNewConnection()
 	go p.AcceptTransactions()
 	go p.AcceptNewConnections()
+	go p.AcceptSignedTransactions()
 
 	var dial_up_addr string = addr + ":" + strconv.Itoa(port)
 	// fmt.Printf("%v is ready to dial\n", p.ID)

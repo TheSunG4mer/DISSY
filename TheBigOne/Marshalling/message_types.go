@@ -9,10 +9,11 @@ import (
 type MessageType int
 
 const (
-	MessageString      MessageType = iota // Contains message of type String
-	MessageTransaction                    // Contains message of type Transaction
-	MessagePeerInfo                       // Contains message of type PeerInfo
-	MessageLedger                         // Contains message of type Ledger
+	MessageString            MessageType = iota // Contains message of type String
+	MessageTransaction                          // Contains message of type Transaction
+	MessagePeerInfo                             // Contains message of type PeerInfo
+	MessageLedger                               // Contains message of type Ledger
+	MessageSignedTransaction                    // Contains message of type SignedTransaction
 )
 
 type MessageContent interface {
@@ -63,6 +64,14 @@ func MarshalLedgerToMessage(l *Local.Ledger) Message {
 	return msg
 }
 
+func MarshalSignedTransactionToMessage(sgn_tx *Local.SignedTransaction) Message {
+	msg := Message{
+		Type:    MessageSignedTransaction,
+		Content: tryMarshal(&sgn_tx),
+	}
+	return msg
+}
+
 func DemarshalToString(rawMessage json.RawMessage) string {
 	var s string
 	json.Unmarshal(rawMessage, &s)
@@ -85,6 +94,12 @@ func DemarshalToLedger(rawMessage json.RawMessage) *Local.Ledger {
 	var l Local.Ledger
 	json.Unmarshal(rawMessage, &l)
 	return &l
+}
+
+func DemarshalToSignedTransaction(rawMessage json.RawMessage) *Local.SignedTransaction {
+	var sgn_tx Local.SignedTransaction
+	json.Unmarshal(rawMessage, &sgn_tx)
+	return &sgn_tx
 }
 
 func SendMessage(conn net.Conn, msg Message) error {
@@ -110,6 +125,10 @@ func SendPeerInfo(conn net.Conn, pi *Local.PeerInfo) error {
 
 func SendLedger(conn net.Conn, l *Local.Ledger) error {
 	return SendMessage(conn, MarshalLedgerToMessage(l))
+}
+
+func SendSignedTransaction(conn net.Conn, sgn_tx *Local.SignedTransaction) error {
+	return SendMessage(conn, MarshalSignedTransactionToMessage(sgn_tx))
 }
 
 func RecieveMessage(dec *json.Decoder) (*Message, error) {

@@ -4,6 +4,8 @@ import (
 	"Local"
 	"Marshalling"
 	"encoding/json"
+
+	// "fmt"
 	"net"
 	"strconv"
 )
@@ -36,7 +38,7 @@ func (p *Peer) AcceptNewConnection() error {
 			return err
 		}
 		// fmt.Printf("	%v sent the ledger to %v\n", p.ID, conn.RemoteAddr())
-
+		p.RemoveConnection(conn)
 		p.MasterLock.Unlock()
 	}
 }
@@ -47,6 +49,17 @@ func (p *Peer) AcceptTransactions() {
 		t = <-p.TransactionChannel
 		p.MasterLock.Lock()
 		p.ApplyTransaction(t)
+		p.MasterLock.Unlock()
+	}
+}
+
+func (p *Peer) AcceptSignedTransactions() {
+	var sgn_tx *Local.SignedTransaction
+	for {
+		sgn_tx = <-p.SignedTransactionChannel
+		// fmt.Println("Received signed transaction")
+		p.MasterLock.Lock()
+		p.ApplySignedTransaction(sgn_tx)
 		p.MasterLock.Unlock()
 	}
 }
@@ -79,6 +92,9 @@ func (p *Peer) ListenToPort(conn net.Conn) error {
 			p.PeerInfoChannel <- Marshalling.DemarshalToPeerInfo(m.Content)
 		case Marshalling.MessageTransaction:
 			p.TransactionChannel <- Marshalling.DemarshalToTransaction(m.Content)
+		case Marshalling.MessageSignedTransaction:
+			// fmt.Println("Received signed Transaction")
+			p.SignedTransactionChannel <- Marshalling.DemarshalToSignedTransaction(m.Content)
 		case Marshalling.MessageLedger:
 			p.MasterLock.Lock()
 			p.SetLedger(Marshalling.DemarshalToLedger(m.Content))

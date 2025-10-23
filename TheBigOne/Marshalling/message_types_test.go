@@ -77,6 +77,35 @@ func TestDemarshalToPeerInfo(t *testing.T) {
 	}
 }
 
+func TestDemarshalToSignedTransaction(t *testing.T) {
+	c, err := Local.MakeClient(200)
+	if err != nil {
+		t.Error(err)
+	}
+
+	tx := Local.MakeTransaction("1234", c.PublicKey, "Bob", 10)
+
+	sgn_tx, err := c.SignTransaction(tx)
+	if err != nil {
+		t.Error(err)
+	}
+
+	raw_sgn_tx := MarshalSignedTransactionToMessage(sgn_tx)
+	if raw_sgn_tx.Type != MessageSignedTransaction {
+		t.Errorf("Did not detect Signed Transaction")
+	}
+
+	got := DemarshalToSignedTransaction(raw_sgn_tx.Content)
+	if got.Sgn.Cmp(sgn_tx.Sgn) != 0 {
+		t.Errorf("Got wrong sign after marshal")
+	}
+
+	if got.Tx.From != sgn_tx.Tx.From || got.Tx.ID != sgn_tx.Tx.ID ||
+		got.Tx.To != sgn_tx.Tx.To || got.Tx.Amount != sgn_tx.Tx.Amount {
+		t.Errorf("Got wrong transaction after marshal")
+	}
+}
+
 func TestDemarshalToLedger(t *testing.T) {
 	L := Local.MakeLedger()
 	L.AddParticipant("Mike")
