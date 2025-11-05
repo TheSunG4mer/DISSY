@@ -1,0 +1,108 @@
+\section{Week 39 - Authenticity}
+
+\Exercise{6.4}
+Let $h$ be the hash function. Let $s = h(m)$, $s' = h(m')$.
+A collision on $h$ means that $s=s'$ but $m\not=m'$.
+
+Now $h(m) = f(m_{t+1}, s_{t}) = f(m'_{t+1}, s_{t'})$.
+If this does not give us an immediate collision on the underlying function, $|m| = |m'|$, also meaning $t = t'$, and $s_t = s'_t$.
+
+If we assume for contradiction that there is not collision to the underlying hash function, it would inductively mean that $s_i = s'_i$ for all $i$. 
+It also requires that $m_i = m'_i$ for all $i$, which would however contradict the prerequisite that we have a collision on the hash function.
+
+\Exercise{6.6}
+\subsubsection*{1: }
+The reason storing the hash values on a different directory but on the same computer is unsafe is, if someone is able to gain access to one folder on her computer, it is likely that they have access to the entire computer, and could therefore update the hash-values to match the changes they made to the files
+
+\subsubsection*{2:}
+Saving hashes of the files is resistent in both cases.
+Using MACs allows deletions and if she uses the same key on two trips, it is also possible to revert files to previous states
+
+\Exercise{6.7}
+Three solutions, all assuming that the car and remote share a MAC key:
+\subsubsection*{1:}
+The car and remote have a counter. 
+Let the value of the car's counter be $i$ and the value of the remote's counter be $j$.
+When the remote sends the 'unlock' message, they attach $i$ and $MAC('unlock', i)$.
+When the car receives an unlock message, verify the MAC, and compare $i$ to $j$. If $i>j$ (and the MAC is verified), unlock the car and set $j = i$. Otherwise reject.
+
+Problem is that counters are troublesome if I'm not wrong
+
+\subsubsection*{2:}
+The car and remote each have a clock.
+Let the clock of the car be $i$ and the clock of the remote be $j$.
+The remote sends the same message as before.
+When the car receives a message, it compares the clocks and we assume some permitted delay.
+
+Problem is synchrony
+
+\subsubsection*{3:}
+When the remote wishes to unlock the car, it sends some opening message, e.g. $'hi'$.
+The car responds with a unique challenge, $i$ (not sure if counters would be good or uniformly random challenge would be better). 
+The remote sends $MAC(i)$. If this is correct, the car unlocks.
+
+\Exercise{6.9}
+Triv...
+
+\Exercise{6.2}
+Suppose Alice and Bob share a secret key $K$, a MAC-black-box, $F$, and A wants to send a bit $b$ to B.
+The encryption algorithm works as follows:
+
+\begin{description}
+    \item[Enc(K, b)]  Let $M$ be a uniformly random string of a fitting length. If $b=0$, let $S$ be a uniformly random string with the same length as the output MAC.
+    If $b=1$ let $S = MAC(K, M)$.
+    Output $M, S$.
+    \item[Dec(K, M, S)]  
+    If $S$ is a valid MAC on $M$, output $b = 1$, otherwise output $b = 0$.
+\end{description}
+
+This is a correct encryption scheme with high probability, as it will only fail if the uniformly random  $S$ is actually a valid MAC. Alice can of course re-draw $S$ if it would make us fail.
+
+It is hiding because of the assumption that a MAC is indistinguishable for a uniformly random string for anyone who doesn't have the key.
+
+\Exercise{6.3}
+\subsubsection*{1:}
+The problem here is, if $|m| \not\equiv 0 (mod 128)$, $MAC(m) = MAC(m || 0)$, which is a different message.
+
+\subsubsection*{2: }
+If $|m| \equiv 127 (mod 128)$, then the last block of $m$ will be $|m|$, but the last block of $m||0$ will just be $(m||0)_t$.
+
+If $|m| \equiv 0 (mod 128)$ then the last block of $m$ will be $m_t$ while the last block of $m||0$ will be $|m|+1$.
+
+
+Otherwise the last block $m_{t+1}$ will be different from $(m || 0)_{t+1}$.
+
+\subsubsection*{3: }
+If you have a non-full-length message, the padding of this message will also be a valid message, and be a collision. 
+
+\Exercise{6.5}
+ \subsubsection*{1: }
+Lets start by talking about the opposite event.
+If $|h^{-1}(a)| < 2$ it means that $|h^{-1}(a)| = 1$.
+There are at most $2^k$ values for $a$, so there can at most be $2^k$ values for $x$ that hash to something with a pre-image size of $1$. The probabilty of choosing such an x when choosing a uniformly random x is
+\begin{align*}
+    \Pr(|h^{-1}(a) \geq 2|) &= 1 - \Pr(|h^{-1}(a) < 2|) \\
+    &\geq 1 - \frac{2^k}{2^{k+1}} \\
+    &= 1/2
+\end{align*}
+
+\subsubsection*{2:}
+Since $y$ is chosen uniformly at random in $[2^{k+1}]$ is must necessarily also be chosen uniformly in $h^{-1}(a)$.
+Given $E$ we know that there are at least 2 elements in $h^{-1}(a)$, so 
+\begin{align*}
+    \Pr(x \not= y) &= 1- \Pr (x = y) \\
+    &= 1 - \frac{1}{|h^{-1}(a)|} \\
+    &\geq 1/2
+\end{align*}
+
+\subsubsection*{3:}
+\begin{align*}
+    \Pr(x \not= y) &= \Pr(E) \cdot \Pr(x \not= y | E) + \Pr(\lnot E) \cdot \Pr(x \not= y | \lnot E) \\
+        &\geq 1/2 \cdot 1/2 + 0 \\ 
+        &= 1/4
+\end{align*}
+
+
+\Exercise{6.8}
+For a digital signature scheme, it must be transferable, i.e. if A sends an authenticated message to B, it must be possible for B to convince C that a message was sent by A and not B.
+\newpage

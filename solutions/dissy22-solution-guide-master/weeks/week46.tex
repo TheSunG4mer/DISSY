@@ -1,0 +1,34 @@
+\section{Week 46 - Attacks and Pitfalls}
+
+\Exercise{13.1}
+Small 32-bit seed space in the output of the {\texttt{dev()} call, Mersenne Twister, bias-inducing post-processing.
+
+\Exercise{13.2}
+The most conservative suggestion is 15360 bits, corresponding to 256-bit secure RSA. An even more conservative answer is migrating from RSA altogether due to quantum attacks.
+
+\Exercise{13.3}
+Solve the system of modular equations below for $a,b$:
+\begin{equation}
+r_{i+2} = ar_{i+1} + b \bmod{m}
+\end{equation}
+\begin{equation}
+r_{i+1} = ar_{i} + b \bmod{m}
+\end{equation}
+
+\Exercise{13.4}
+Using a standard square-and-multiply binary exponentiation algorithm, a remote timing attack would be able to leak the Hamming weight of the private key, which is not super useful.
+A micro-architectural attack synchronized with the iterations of the exponentiation would leak individual bits. One such example would be using Flush+Reload to discover if a multiplication was executed in each operation.
+
+A mitigation is to make the algorithm regular. This can be achieved by implementing a square-and-multiply-always algorithm that always computed the multiplication and conditionally throws it away. Another possibility is to multiply the exponents by a short random string (exponent blinding).
+
+\Exercise{13.5}
+Open question. One extreme possibility would be to encode answers in what is printed such that others can decode them from listening in.
+
+\Exercise{13.6}
+Decryption is $D(c) = c_2 \cdot c_1^{-x} \bmod{p}$. Malleability can be exploited by multiplying two ciphertexts or multiplying a ciphertext by a message $m'$, such that both would obtain encryptions of the product of messages.
+
+\Exercise{13.7}
+Open question.
+
+\Exercise{13.8}
+Open question.

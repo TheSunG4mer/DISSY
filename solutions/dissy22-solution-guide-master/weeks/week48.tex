@@ -1,0 +1,57 @@
+\section{Week 47 - Nakomoto Style Consensus}
+16.1; 16.4
+
+\Exercise{16.1}
+Reducing the fraction of honest tickets. 
+The standard tree scenario:
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|l|l|c|}
+        \hline
+        90\% & Honest & h\\
+        95\% & Timely & t \\
+        90\% & Unique Winners & u\\
+        \hline
+    \end{tabular}
+\end{table}
+We may calculate the bounds for individual winners (pessimistically), and then assuming independence the fraction contributing towards tree growth should converge towards this as the number of winners grows.
+
+Tree Growth:
+Of $h$ honest winners we expect a fraction $t$ of them to be unique. 
+$$ h \cdot u$$
+Then there is a probability $t$ that it is timely:
+$$ TG = h \cdot u \cdot t $$
+The lucky slot Lemma (16.7) implies this will grow the honest tree. 
+At most $1 - TG$ winners may be on side branches to the longest branch in the honest tree.
+The longest chain is bounded below by tree growth:
+$$LC \geq TG$$
+There must be at least $h - (1-LC)$ on the longest chain. 
+$$ ChainQuality = \frac{h - (1-LC)}{LC}$$
+Minimised when $LC = TG$ for probabilities.
+$$ \frac{h - (1- h \cdot u \cdot t )}{h \cdot u \cdot t }$$
+For $t = 0.95$ and $u = 0.9$
+$$ \frac{1.855\cdot h - 1}{0.855\cdot h}$$
+
+Solving for $h$ gives $0.70$ in 
+$$ 0.5 =  \frac{1.855\cdot h - 1}{0.855\cdot h}$$
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|l|l|}
+        \hline
+        $h=0.85$ &  $0.79$\\
+        $h = 0.8$ & $0.71$\\
+        \hline
+    \end{tabular}
+\end{table}
+
+\Exercise{16.4}
+\begin{enumerate}
+    \item 
+    Dynamic state. Win probability with a single account. Draw is independent of balance $1\%$ win rate on any account. Probability that all draws are too bad 
+    $$1- (0.99)^{100} = 1- 0.366 = 0.634 $$
+    A very high probability of winning.
+    \item 
+    Many possible solutions, freeze state in epochs and add new randomness to adversary cannot predict draws after this time
+\end{enumerate}
+
+

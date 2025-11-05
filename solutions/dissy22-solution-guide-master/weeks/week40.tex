@@ -1,0 +1,100 @@
+\section{Week 40 - Synchrony and BA}
+Exercises: 7.1; 7.2; 7.3; 7.4; 8.1; 8.3; 8.4; 8.5; 8.6
+
+\Exercise{7.1}
+\begin{center}
+\begin{tikzcd}
+  & {T_2'} \arrow[dashed, dr, "c"] \arrow[rrr] & & & {T_3'} \arrow[rd, dashed, "c"] \arrow[rrrrdddd, "d",dashed, bend left] \\
+  & & {T_2} \arrow[rrr] & & & {T_3} \arrow[rrdd,"b"] & & & \\
+  & & & & & & & \\
+  {T_1} \arrow[ruuu, dashed,"a"] \arrow[rruu,"b"'] \arrow[rrrrrrr] \arrow[rrrrrrrrd, dashed, bend right=8] & & & & & & & {T_4} \arrow[rd, dashed, "\epsilon"] & \\
+  & & & & & & & & {T_4'}
+\end{tikzcd}
+\end{center}
+We have two cases the ideal (where nothing drifts) and the real case (with drift, denoted with dashed lines and primes). We are given the ideal case in the book. We compute the real case first. Starting with \(\mathtt{TransEst'}\)
+\[ \mathtt{TransEst'} = \frac{(T_4' - T_1) - (T_3' - T_2')}{2} \]
+where \(T_4' \leq T_4 + \varepsilon\) and \((T_3' - T_2') = (T_3 - T_2)\), we get
+\[ \mathtt{TransEst'} \leq \frac{(T_4 - T_1) - (T_3 - T_2)}{2} + \frac{\varepsilon}{2} = \mathtt{TransEst}+ \frac{\varepsilon}{2} \]
+\[ \mathtt{OffsetEst'} = T_1 + \mathtt{TransEst'} - T_2' \]
+However we know that \(T_2 - \frac{\delta}{2} \leq T_2'\), so
+\[ \mathtt{OffsetEst'} \leq T_1 + \mathtt{TransEst'} - \left(T_2 - \frac{\delta}{2}\right) = T_1 + \mathtt{TransEst'} - T_2 + \frac{\delta}{2} \]
+using the inequality for \(\mathtt{TransEst'}\) we have:
+\[ \mathtt{OffsetEst'} \leq T_1 + \mathtt{TransEst} + \frac{\varepsilon}{2} - T_2 + \frac{\delta}{2} = T_1 + \mathtt{TransEst} - T_2 + \frac{\varepsilon + \delta}{2} \]
+From which we get:
+\[ \mathtt{OffsetEst'} \leq \mathtt{OffsetEst} + \frac{\varepsilon + \delta}{2} \]
+Meaning the real offset if off by at most \(\frac{\varepsilon + \delta}{2}\).
+
+\Exercise{7.2}
+If we first synchronize as normal, then we know that we are \(\frac{|t_1 - t_2|}{2}\) away from the correct solution (by \(\delta = |t_1 - t_2|\) in Ex 7.1). Can we do better? No, we are trying to find three variables, with two equations namely:
+\[T_2 = T_1 + t_1 - \mathtt{Offset}\]
+\[T_4 = T_3 + t_2 + \mathtt{Offset}\]
+However this is not possible!
+
+% (Remember this is under the assumption \(\varepsilon = 0\) and that \(t_1\) \ \(t_2\) are consistent in the communication!)
+
+\Exercise{7.3}
+You figure out the offset for the servers, and check the difference. Update to the midpoint of offsets based on the two of the servers that are the closest. See Exercise 3.2. If some server tries to cheat you, then it will just be left out of the computation!
+
+\Exercise{7.4}
+We do the same protocol with taking the average offset of the two offsets that are the closest. We get the biggest offset from the real time, if the two servers agree
+\[ \mathtt{Offset}_{S1} = |T_{C} - (T_{real} + \delta)|, \mathtt{Offset}_{S2} = |T_{C} - (T_{real} + \delta)| \]
+\begin{align*}
+  \mathtt{Offset} &= \frac{\mathtt{Offset}_{S1} + \mathtt{Offset}_{S2}}{2} \\
+                  &= \frac{|T_{C} - (T_{real} + \delta)| + |T_{C} - (T_{real} + \delta)|}{2} \\
+                  &= \left| T_{C} - (T_{real} + \delta) \right|
+\end{align*}
+which is an \(\delta\) offset. If we know the max offset, then we do not get any better, since we are not sure what direction or by how much exactly the servers are offset.
+
+% Median might be better. 
+
+\Exercise{8.1}
+We have the following rounds:
+\begin{itemize}
+\item 1 to All. The initial message is broadcast. (\(N-1\) messages)
+\item All to All for a single message. The message is forwarded to everyone else. That is everyone has received message from everyone. (\((N-1) \cdot (N-1)\) messages)
+\end{itemize}
+Total amount of messages \((N-1)^2 + (N-1)\).
+% Notation is confusing, since every j is the Party itself for bid and m in fig 8.4.
+
+\Exercise{8.3}
+Make sense to go through BA before going through exercises!\\
+% The byzantine agreement is whether or not the signatures received were valid. If 1 is output, all (honest) parties had a valid signature, thus we can output the input message. Validity follows from the validity of broadcast and Agreement follows from BA. (BA accepts with majority, and all honest parties gets to see all other honest parties views)
+
+Vote $1$ if only a single correctly signed message 
+was seen. Vote $0$, otherwise.
+If $BA$ outputs $1$ output the message seen in the first round, otherwise nomsg.
+
+Validity follows from unforgeability of signatures, an honest sender will result in honest parties all voting $1$, thus validity of $BA$ ensures that it outputs $1$ making parties output the message.
+
+Agreement, all parties see the same bit from the $BA$(agreement of $BA$). 
+We must then argue that all parties will know which message to output. 
+No honest parties can have seen different messages in round 1 as this would imply all honest parties voting $0$ and thus the BA cannot output $1$ by validity.
+\sebastian{I don't think we need round 3}
+\simon{The protocol above does not work if some honest party does not receive a message in the first round and receives multiple forwarded messages later. The following should work.}
+\begin{enumerate}
+  \item S sends m to all parties.
+  \item Each party denotes by $ISaw$ all messages received by the start of round 2 and forwards this set to everyone with a signature (and the original signature of the sender).
+  \item Each party denotes by $Seen$ the union of all the valid $ISaw$ sets received by the start of round 3, and $SeenByMajority$ the messages that are in at least $n-t$ of those sets. I forwards the $SeenByMajority$ set with all the relevant signed $ISaw$ sets so others can verify it.
+  \item Each party runs BA with input $v$, where $v=1$ iff $|Seen|=|SeenByMajority|=1$.When the output of BA is defined, if $out = 0$ output $NoMSG$, otherwise output the unique message in a valid $SeenByMajority$ set.
+\end{enumerate}
+\simon{Round 3 can be run in parallel with or after the BA. But this follows the structure asked in the excercise.}
+Lemma: If BA=1, then the union of all honest $ISaw$ consists of a single message, $m$.
+
+Proof: At least one honest party voted 1, thus has $|Seen|=|SeenByMajority|=1$. That party received all honest $ISaw$ their union can have at most one element.
+Additionally at least one of them must include a message as $SeenByMajority$ is nonempty, hence some message was in $ISaw$ from $n-t$ parties and at least one honest. 
+
+Agreement now follows: If BA=1, then each valid $SeenByMajority$ set is either empty or contain the same message, as only one message was included in the honest $ISaw$. We are guaranteed to see at least one nonempty $SeenByMajority$, as an honest party voted 1.
+
+\Exercise{8.4}
+Everyone sends the message around to each other, we therefore know that each of the N parties received the message from all other N parties. We output the message if n-t of the messages agree.
+\\ \\
+Validity follows from AC, and agreement follows from BA.
+% Show Validity, Agreement and (Typo)
+
+\Exercise{8.5}
+See Figure 8.14. We cannot get both validity and agreement at the same time, so we cannot do better than \(\frac{1}{2}\)-broadcast.
+
+\Exercise{8.6}
+We can reduce to the 3 party case by grouping all the parties into 2 honest parties and one corrupted, which we have already shown to fail.
+% More details
+\newpage

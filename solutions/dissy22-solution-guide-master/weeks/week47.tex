@@ -1,0 +1,49 @@
+\section{Week 47 - State Machine Replication}
+14.2; 14.3; 14.4; 14.5; 14.6; 14.7; 14.8
+
+\Exercise{14.2}
+\begin{enumerate}
+    \item The servers are asynchrnous, this gives no guarantees.
+    \item S2 may be ahead, this might cause problems
+    \item If we log off S1 before connecting to S2 this may cause N to arrive in the time between.  
+\end{enumerate}
+
+\Exercise{14.3}
+Setting $n = 4t + 1$
+\begin{enumerate}
+    \item This allows a single server to move the client back in time, as the report is not guaranteed to be newer, a byzantine server can get the client to output an arbitrary report.
+    \item Again a single server can force the client to read a certain report.
+    \item The state is now from an honest server, but may not be newer than the previous read.
+    \item At least $t+1$ honest servers will be at least at time $c$, and have the last read state.
+    The new timestamp will have an honest overlap with the previous line, so we will get a newer state.
+    \item 
+    Will also work, but less efficient.
+    \item Won't work, can't wait for corrupt servers.
+\end{enumerate}
+
+
+\Exercise{14.4}
+\begin{enumerate}
+    \item Date: No
+    \item Increment: Yes, but doesn't use the state
+    \item Temperature: No
+    \item Random: True random means it is not really a function
+    \item Year: No
+    \item Store: Yes
+    \item Sum: Yes
+\end{enumerate}
+
+\Exercise{14.5}
+Does not work because parties may get different messages in different rounds, giving a different output ordering.
+
+Avoids a corrupt leader reducing liveness, but doesn't work...
+
+\Exercise{14.6}
+This works because output is received in the same round from each broadcast. It avoids waiting for a corrupt leader, but there may be significant duplication in what the parties are broadcasting.
+
+\Exercise{14.7}
+Can't wait for corrupt parties, no liveness.
+
+\Exercise{14.8}
+Servers may not have the same set of Acasts complete first for them, resulting in different sets being output.
+\newpage

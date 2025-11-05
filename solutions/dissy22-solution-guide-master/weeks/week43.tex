@@ -1,0 +1,96 @@
+\section{Week 43 - Asynchronous BA and Broadcast}
+
+\subsection*{Exercises}
+10.1; 10.2; 10.4; 10.5; 10.6; 10.7; 10.8; 10.9; 10.10; 10.3
+\medbreak
+
+\subsection*{Exercise 10.1}
+Assume fully connected, AC, Async. comm with Byzantine errors. Show there is no protocol for broadcast tolerating \(t = n/3\) errors.
+
+We start by looking at the example of \(n = 3\), \(t = 1\) (\(S\),\(R_1\),\(R_2\)).
+\begin{itemize}
+\item \(S\) is corrupt, and we slow down \(R_2\).
+\item \(R_2\) is corrupt, and never responds to \(R_1\)
+\end{itemize}
+Both cases look equal, and since we should tolerate a corruption, we must at some point terminate, however we do not know which case we are in, meaning we cannot get agreement, since \(R_1\) has never seen anything from \(R_2\).
+\\ \\
+We can reduce a setting of \(n = 3t\) to this case by having one group of all \(t\) corrupted parties, and 2 groups \(t\) honest parties.
+
+\subsection*{Exercise 10.2}
+Show hard vote on \(W_i\) and \(W_j\) in \texttt{BaVUP} and \texttt{SVUP} implies \(W_i = W_j\).
+\\ \\
+\texttt{Proof.} Assume \(W_i \neq W_j\), then we have \(n-t\) (majority honest parties) justified votes on the same \(J\). The two \(J\) values come from \(n-t\) justified values that agree. We have at least \(t+1\) honest parties voting for either \(J\), since removing all corrupted parties gives us
+\[ (n-t)-t = t+1. \]
+This means we have an honest party giving two different justified values since the total number of honest parties is \(n - t = 2t + 1\) and the total votes of honest parties are \(2 \cdot (t+1) = 2t+2\), but \(2t + 1 \leq 2t+2\). But since all honest parties should be consistent we get a contradiction! Meaning \(W_i = W_j\).
+
+\subsection*{Exercise 10.3}
+Make a prerun of two DeVUP, since there will always be more justified votes for the correct output (the honest output), since we need (n-t) values, we will have the correct W after this round.
+
+\paragraph{Termination} We just do a preround that might terminate before, but otherwise we still have the same termination guarantees as before!
+\paragraph{Validity, Agreement} Same except for preround, and if we terminate in the preround then all Pj output the same value by silimar argument as if we terminate later.
+
+% Should we run n, n-t, t rounds instead? How many hard votes do we get each round? Network is stable so should only need one round!
+
+\subsection*{Exercise 10.4}
+We can implement ACast using ABA by sending m to everyone, and then do ABA to get agreement.
+This ABA could be for each bit of the message at a time.
+If the message is not of a fixed length we could add an ABA to decide whether to continue after each bit.
+It is important that the honest parties start the same ABA protocols, to get termination. 
+But this contradicts the threshold on ACast, meaning we cannot do \(t = n/3\) for ABA.
+
+\subsection*{Exercise 10.5}
+Simply flood EQ when this is received from the sensor.
+Parties may output EQ if they have seen it from two others or their own sensor.
+
+Termination is only required when honest parties get the same input. 
+This makes it easier than ABA.
+
+\subsection*{Exercise 10.6}
+We cannot get both agreement and validity.
+(This problem reduces to n = 3, t = 1 which is impossible to do with ABA. We can therefore not get)
+
+\subsection*{Exercise 10.7}
+Since n = 4, we can trivially use ABA. Which gives us Termination, Validity and agreement! But we cannot do this determanistically, since we can reduce ABA to this problem trivially!
+
+\subsection*{Exercise 10.8}
+For \(n = 3\) we cannot solve it, this would allow solving ABA.
+
+Start from $t=0$ run an ABA to exclude times until we reach get an output $1$.
+For an honest party with $t_i$, it should vote $1$ for $t' \in \{t_i -1, t_i, t_i +1\}$ and $0$ otherwise.
+This guarantees that a timeslot which an honest party has, is never eliminated.
+Vote for the subsequent timeslots until the ABA gives $0$ again
+
+For the ABA of a timeslot to output $1$ there must be an honest party with that timeslot or the one adajcent to it.
+There are two possible scenarios, there are $4$ timeslots with a $1$, or there are $3$ timeslots with a one.
+If there are three timeslots we just take the middle one, as both honest times are in the interval this must be an honest time.
+If there are four we may take either of the middle two, recall for a timeslot be included it must have an honest vote, and therefore be an honest time or adjacent to an honest time. 
+Therefore, for there two be four slots the middle pair must be honest times.
+
+Agreement and termination follows from the properties of ABA.
+
+% If all honest parties have 
+
+%  but we can for \(n = 4\) using ABA. 
+% We can vote about which pair of values next to each other are correct. We always agree if a pair is correct, by validity. We might agree on other pairs, resulting in either
+% \begin{itemize}
+% \item the four possibilities \(t_a < t_b < t_c < t_d\), meaning \(t_b\) and \(t_c\) is correct.
+% \item the three possibilities \(t_a < t_b < t_c\), in which case we vote about \(t_a\) and \(t_c\). If both fail, then someone said \(t_b\) meaning we can return \(t_b\) otherwise return the one that succeeded. Both cannot succeed.
+% \end{itemize}
+% (How to distribute the times, do binary search for the correct time!).
+% We cannot do this deterministically, as we can trivially reduce ABA to this problem.
+
+\subsection*{Exercise 10.9}
+All parties may have different inputs.
+Validity says the output must be an input of an honest party, the functionality would then allow distinguishing corrupt from honest parties, even as the corrupt parties follow the protocol.
+Corrupt parties which do not cheat should be indistinguishable from the honest parties.
+% We do not get the correct input, as we might flip some bits. This is therefore impossible!
+% \todo[inline]{contradiction can detect which parties are corrupt}
+
+% \texttt{Proof.} If we let each honest party \(i\) have a zero vector with a one in position \(i\), then we cannot get any guarantees, that the resulting vector has a one in just one index, meaning no honest party would have that input. We can therefore not get strong validity.
+
+\subsection*{Exercise 10.10}
+We can now run ABA in parallel for each bit, which will give a correct W, since all honest parties have the same input, meaning nothing will change in the output.
+
+Agree on length?
+
+\newpage

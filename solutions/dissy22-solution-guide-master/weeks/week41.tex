@@ -1,0 +1,245 @@
+\section{Week 41 - Key Management and Infrastructure}
+
+\subsection*{Exercises}
+9.1; 9.2; 9.4; 9.5; 9.9; 9.6; 9.7; 9.8; 9.10
+\medbreak
+
+Many of the discussion questions for this week are highly subjective and context dependent, with the exercises and solution guide simply providing a starting point for discussion.
+
+\Exercise{9.1}
+\begin{itemize}
+    \item There is no guarantee that the message came from A, anyone can use the public key of B. 
+    \item B provides a decryption oracle, if we intercept the return message, we can ask for this to be decrypted and receive R (by starting our own protocol), while B obtains some nonsense key from decrypting R.
+    With R an adversary can produce and desired MACs and decrypt all messsages.
+\end{itemize}
+
+\Exercise{9.2}
+The Needham-Schroeder protocol as described in the book is shown below.
+\begin{center}
+    \fbox{
+        \procedure{}{
+            \textbf{Alice} \> \> \textbf{Bob}\\ [0.1\baselineskip][\hline]
+            \\ [-0.5\baselineskip]
+            \text{Choose }  n_A\\
+             \>
+            \sendmessageright*{{E_{pk_B}(ID_A,n_A)}} 
+            \> \\%ID_A, n_A\\
+            \> \>  \text{Choose } n_B\\
+            \> \sendmessageleft*{E_{pk_A}(n_A,n_B)} \>\\
+            \text{Check }n_A \\
+            \> \sendmessageright*{E_{pk_B}(n_B)} \\
+            \> \> \text{Check } n_B\\
+            \\
+            k = \textrm{KDF}(n_A,n_B) \> \> k = \textrm{KDF}(n_A,n_B) \\
+        }
+    }     
+\end{center}
+The MITM attack:
+\begin{figure}[H]
+    \centering
+    \fbox{
+        \procedure{}{
+            \textbf{Alice} \> \> \textbf{Eve}\> \>\textbf{Bob} \\ 
+            [0.1\baselineskip][\hline]
+            \\ [-0.5\baselineskip]
+            \text{Choose }  n_A\\
+             \>
+            \sendmessageright*{{E_{pk_E}(ID_A,n_A)}} 
+            \>\text{switch keys}  \> \sendmessageright*{{E_{pk_B}(ID_A,n_A)}} \\%ID_A, n_A\\
+            \> \>  \> \>\text{Choose } n_B\\
+            \> \sendmessageleft*{E_{pk_A}(n_A,n_B)} \> \text{forward message} \> \sendmessageleft*{E_{pk_A}(n_A,n_B)}\\
+            \text{Check }n_A \\
+            \> \sendmessageright*{E_{pk_E}(n_B)} \> \text{switch keys}\>\sendmessageright*{E_{pk_B}(n_B)}\\
+            \> \> \> \>\text{Check } n_B\\
+            \\
+            k = \textrm{KDF}(n_A,n_B) \> \> k = \textrm{KDF}(n_A,n_B) \> \> k = \textrm{KDF}(n_A,n_B) \\
+        }
+    }     
+\end{figure}
+The MITM attack to get the nonce no longer works, as $n_B$ is never encrypted under Eve's public key.
+However, an adversary no longer needs to interact with Alice to impersonate her towards Bob. They are not able to get the resulting key, but break authentication as Alice did not participate.
+
+\Exercise{9.3}
+The protocol described in the exercise:
+\begin{center}
+    \fbox{
+        \procedure{}{
+            \textbf{S} \> \> \textbf{R}\\ [0.1\baselineskip][\hline]
+            \\ [-0.5\baselineskip]
+            \text{Choose }  n_S\\
+            \> \sendmessageright*{n_S} \\%ID_A, n_A\\
+            \> \>  \text{Choose } n_R\\
+            \> \sendmessageleft*{E_{K_{SR}}(n_S), E_{K_{SR}}(n_R)} \>\\
+            \text{Check }n_S \\
+            \> \sendmessageright*{n_R} \\
+            \> \> \text{Check } n_R
+        }
+}     
+\end{center}
+
+\begin{center}
+    \fbox{
+        \procedure{}{
+            \textbf{A(R)} \>\> \textbf{E} \> \> \textbf{A(S)}\\ [0.1\baselineskip][\hline]
+            \> \sendmessageright*{username_A} \> \> \sendmessageright*{username_B}\pclb
+            \pcintertext[dotted]{protocol}\\
+            \\ [-2\baselineskip]
+            \> \> \> \> \text{Choose }  n_S\\
+            \> \sendmessageleft*{n_S} \> \> \sendmessageleft*{n_S} \\%ID_A, n_A\\
+             \text{Choose } n_R\\
+            \> \sendmessageright*{E_{K_{SR}}(n_S), E_{K_{SR}}(n_R)} \> \> \sendmessageright*{E_{K_{SR}}(n_S), E_{K_{SR}}(n_R)}\\
+            \> \> \> \> \text{Check }n_S \\
+            \> \sendmessageleft*{n_R} \> \> \sendmessageleft*{n_R}  \\
+             \text{Check } n_R
+        }
+}     
+\end{center}
+% \begin{figure}[H]
+%     \begin{tabular}{cc}
+%         \fbox{
+%         \procedure{A starting session with B}{
+%             \textbf{A(R)} \> \> \textbf{B(S)}\\  [-0.5\baselineskip]
+%             \> \sendmessageright*{username_A}\pclb
+%             \pcintertext[dotted]{protocol}\\
+%             \> \> \text{Choose }  n_S\\
+%             \> \sendmessageleft*{n_S} \\%ID_A, n_A\\
+%             \text{Choose } n_R\\
+%             \> \sendmessageright*{E_{K_{SR}}(n_S), E_{K_{SR}}(n_R)} \>\\
+%             \> \> \text{Check }n_S \\
+%             \> \sendmessageleft*{n_R} \\
+%             \text{Check } n_R
+%             }
+%             }  
+%             &
+%             \fbox{
+%                 \procedure{B starting session with A}{
+%                     \textbf{B(R)} \> \> \textbf{A(S)}\\  [-0.5\baselineskip]
+%                     \> \sendmessageright*{username_B}\pclb
+%                     \pcintertext[dotted]{protocol}\\
+%                     \> \> \text{Choose }  n_S\\
+%                     \> \sendmessageleft*{n_S} \\%ID_A, n_A\\
+%                     \text{Choose } n_R\\
+%                     \> \sendmessageright*{E_{K_{SR}}(n_S), E_{K_{SR}}(n_R)} \>\\
+%                     \> \> \text{Check }n_S \\
+%                     \> \sendmessageleft*{n_R} \\
+%                     \text{Check } n_R
+%                     }
+%                     }     
+%                 \end{tabular}\\
+% \end{figure}
+\begin{itemize}
+    \item 
+    A is willing to play both roles in the protocol, as the key used is symmetric we can get A to decrypt messages which only B should be decrypting. 
+    
+    Replay the nonce from A in the other session, getting A to encrypt it along with a new nonce. Use these encyryptions to send back to A convincing them B is live.
+
+    \item 
+    Either add state and track which nonces you have chosen, or add something to the encryptions tying them to that specific session/who they are sent from.
+\end{itemize}
+
+\Exercise{9.4}
+The idea here is to notice that for instance $g \in \{-1,0,1\}$ would be very poor choice since regardless of how good $x$ and $y$ are is, $g^{xy}$ in these cases can only assume very few values. If there are students which are good mathematically you can talk about groups and subgroups (if you know about that :) ). With p I am just fishing after them thinking about how this works. Of course if p is very small then $g^{xy}$ can only assume few values
+
+\Exercise{9.6}
+\begin{itemize}
+    \item[(1)]
+    Sending a hash of the password would allow a replay attack, this may still be the case if it is encrypted.
+    A random challenge prevents this for a passive attacker, as the signature will not be useful later, even in the clear.
+    \item[(2)]
+    Access to the password hash would allow an offline bruteforcing.
+    Access to the public key would not help the read only attacker. 
+    If the attacker could change the hash or public key they could gain access to the system.
+    \item[(3)] 
+    The password may be in the users head, in which case access to the disk would not be a problem, an active attack may still allow stealing the password at time of login.
+    If the key were stored in the clear on the disk this would it to be stolen.
+\end{itemize}
+
+\Exercise{9.7}
+Making the function slow to evaluate makes a dictionary attack more expensive. 
+Adding the salt prevents precomputation for passwords forcing an attacker to target a single user at a time.
+
+\Exercise{9.8}
+
+\begin{itemize}
+    \item[(1)]
+    A keylogger on the pc would allow a hacker to steal the password.
+    It is probably harder to log keys on the dedicated hardware.
+
+    \item[(2)]
+    The user cannot see what they are signing, corrupt software may make them sign the wrong document.
+
+    \item[(3)]
+    This would prevent the software from signing an arbitrary number of documents for each time the user authenticates. 
+    This may help the user discover if the wrong thing is singed, but they may not notice this. 
+
+    \item[(4)]  
+    This shifts the system to a single point of trust/failure. 
+    There is still centralised trust of those producing the hardware units, so it is debatable how big a change this is.
+    For some users it may be a better solution to have centralised authentication, especially less technically proficient users.
+
+\end{itemize}
+
+\Exercise{9.9}
+For any user can guess $L R$ passwords.
+For uniform passwords this gives success probability. 
+$$ LR / S$$
+We can find the probability of breaking at least one password by taking one minus the probability of breaking no passwords. 
+$$ 1 - \left(1- \frac{LR}{S}\right)^N$$
+\newpage
+
+\begin{comment}
+\Exercise{9.5}
+For $d$ digits
+$$d^\ell = 2^{128}$$
+$$\ell =  128 / \log (d)$$
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{c|c}
+        $d$ & $\ell$\\
+        \hline
+        10 & 39\\
+        36 & 25\\
+        128 & 19\\
+    \end{tabular}
+\end{table}
+It is worthwhile discussing the diminishing returns of a larger alphabet vs length.
+Is it easier to have a longer password of non-special characters?
+
+\Exercise{9.6}
+\begin{itemize}
+    \item[(3)] $E_{MK}(K \oplus CV),~ CV$ \\
+    This is obviously broken for any encryption scheme.
+    \item[(1)] If the ciphertext is malleable, think OTP, CTR, ... a bit of the CV and encryption can be flipped.
+    \item[(2)] For an idealised encryption scheme flipping a bit of the key should make the decryption entirely random and unrelated. 
+\end{itemize}
+
+\Exercise{9.7}
+Read only access is not a problem, the insider cannot see which cards have which pins.
+For write only access the insider could replace the pin of a card with their own pin.
+This could still work for $pin \oplus cardno$ as the insider may be able to flip the corresponding bits of their pin to cancel out the wrong card number.
+
+\Exercise{9.8}
+This places trust on the postal service. It may be possible to intercept this letter, e.g. steal the letter from the post box.
+Trust needs to be established at some point, this requires some real world interaction, mail may be a reasonable choice.
+
+The students will have surprisingly many root certificates, also from organisations that they do not necessarily trust.
+
+\Exercise{9.10}
+\begin{itemize}
+    \item[(1)]
+    $$ (9/10)^{40} \approx 0.015$$
+    Can exclude $10^4 - 9^4 = 3439$.
+    \item[(2)]
+    Pincodes with many of the same numbers are more likely to be excluded.
+    A single one with probability:
+    $$ (9/10)^{39} (1/10)  \approx 0.0016$$
+    For each position of the $1$ there are $9^3$ choices of the remaining digits. $4 \cdot 9^3 = 2916$
+    Each of these cases could be considered for every possible digit.
+    \item[(3)]
+    Humans are very bad at choosing random numbers, there may be significant bias.
+    \item[(4)]
+    The quality of this solution depends on the quality of the alternative, it is better than writing the whole pin down, but worse than remembering it.
+    Reducing the search space somewhat may not be an issue if the attacker only has three pin attempts and there are several thousand possibilities left.
+\end{itemize}
+\end{comment}

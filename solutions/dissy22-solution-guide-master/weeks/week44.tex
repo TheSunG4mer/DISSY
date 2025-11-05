@@ -1,0 +1,43 @@
+\section{Week 43 - Network Security Mechanisms}
+
+\Exercise{11.2}
+
+For simplicity, let's assume that sender and receiver are not malicious, and the adversary is a global passive adversary in control of a fraction of the nodes. The analysis changes a bit if we assume the destination to also be malicious, because it fulfills the purpose of the final node below.
+
+Having a single node/server makes it a single point of failure, thus not admissible. Having two servers tolerates at most only one corruption, so three servers is the minimum number to tolerate two corruptions. However, if the first and third node collude, the adversary may still break anonymity through traffic or timing analysis.
+
+Growing the number of servers does not add that much in terms of anonymity, because an adversary compromising the first and final nodes may still be able to perform traffic analysis. However, it may be harder for an adversary attacking nodes at random to still find and compromise these exact positions. In any case, it impacts performance considerably, so the trade-off becomes less advantageous.
+
+For reference, Tor attempts to pick the 3 nodes from different countries, to minimize the possibility of nodes in the same potentially compromised ISP. It also maintains a reputation system to detect adversary-controlled nodes and ban them from the network.
+\newpage
+
+\begin{comment}
+\subsection*{Exercises}
+11.1; 11.6; 11.7; 11.3; 11.4; 11.5; 11.8
+\medbreak
+
+\Exercise{11.6}
+The communication/interaction pattern cannot depend on whether a goal is scored.
+We only need to send a single bit of information. 
+Football matches have a limited length, so if we send messages at fixed intervals this only requires some fixed number of messages.
+The simplest solution an information theoretic solution with a lookup table for goal and not goal, with a value for each second of the match.
+
+Napkin math: 90 minutes means 5400 seconds in regular play time. If each of the messages is 128 bits then this gives $128 \cdot 2 \cdot 5400 = 1,382,400$ bits, or $168.75$KiB.
+(Even this is overkill, we only really need statistical security, so we could try and get away with 60 bits or smaller.)
+
+\Exercise{11.3}
+If a handshake takes place over $t$ seconds, there will be $t \cdot 10^6$ ($1 \mu s = 10^{-6}s$).
+This is only a million possibilities if the handshake takes less than a second, which could easily be tried. The guess can be verified directly from the messages sent by the parties.
+
+\Exercise{11.5}
+\begin{enumerate}
+    \item 
+    The CRC algorithm has no secret inputs may just be recomputed by anyone for a new message $M'$.
+    \item 
+    Even when encrypted the ciphertext is malleable as a bit of the ciphertext may be flipped as long as the corresponding bits in the CRC part of the ciphertext are flipped.
+\end{enumerate}
+
+% \Exercise{11.8}
+% Implement TLS key exchange?
+\newpage
+\end{comment}

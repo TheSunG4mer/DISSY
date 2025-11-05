@@ -1,0 +1,102 @@
+\section{Week 36 - Introduction}
+
+\subsection*{Exercises}
+1.1; 1.2; 1.3; 1.4; 1.5; 2.1; 2.2; 2.2; 2.4
+
+\Exercise{1.1}
+\begin{enumerate}
+    \item
+    We want to argue that we always read the latest change made to the file.
+    They key point is that any set of $r$ servers being read from must overlap with the $w$ servers written to in the previous write operation, due to $r+w > n$ and a pigeonhole argument.
+    
+    To argue this more formally an inductive argument across the number of read/write operations can be made, where all servers start with the empty string $\epsilon$ in the base case.
+    \item
+    $\forall R \in \mathcal{R}, \forall W \in \mathcal{W}, R \cap W \neq \emptyset$
+\end{enumerate}
+
+\Exercise{1.2}
+Three servers as in Example 1.2, where one has crashed and is now in state $(-1, \epsilon)$.
+Reentry protocol: read both other servers and take the state and timestamp of the server with the highest timestamp.\\
+
+Security analysis:
+\begin{itemize}
+    \item Prior to crashing two of the servers had state $(t,f)$, with the third server having $(t',f')$ where $t' < t$.
+    \item No matter which server crashes one of the live servers will still have state $(t,f)$
+    \item If any writes occurred while the server was crashed both live servers will be in a new state $(t_2,f_2)$ for $t_2 > t$.
+    \item When reentering the server takes the newest state, ensuring that two out of three of the servers have this state, ensuring that subsequent reads see the newest state. 
+\end{itemize}
+\Exercise{1.3}
+\begin{enumerate}
+    \item Liveness
+    \item Safety
+    \item Safety 
+    \item Neither (A conjunction of liveness and safety)
+\end{enumerate}
+
+\Exercise{1.4}
+\begin{enumerate}
+    \item 
+    \note{IT classes may not be with "If and only if" from previous courses}
+    Safety: If $R$ outputs $(\textsc{Received}, m, S)$ then $S$ at some point earlier got input $(\textsc{Send}, m, R)$
+
+    Liveness: If $S$ got input $(\textsc{Send}, m, R)$ then $R$ will at some point output $(\textsc{Received}, m, S)$
+
+    \item 
+    Safety: If $R$ has output $(\textsc{Received}, m, S)$ then no party which has not already output $(\textsc{Received}, m, S)$ may output anything other than $(\textsc{Received}, m, S)$.
+
+    Liveness: If $R$ has output $(\textsc{Received}, m, S)$ then all parties will eventually output $(\textsc{Received}, m, S)$ 
+    \note{This assumes that all parties will keep saying something }
+\end{enumerate}
+
+\Exercise{1.5}
+\begin{description}
+    \item[Fully Synchronous] $t + 2 \cdot \Delta_{\textsc{clock}} + \Delta_{\textsc{send}}$. 
+
+    $P$ may be $\Delta_{\textsc{clock}}$ behind natural time, sending takes $\Delta_{\textsc{send}}$, and $Q$ may be $\Delta_{\textsc{clock}}$ ahead of natural time.
+
+    \item[Fully Asynchronous] No guarantees. 
+    \item[Partially Synchronous] No guarantees, $\Delta_{\textsc{send}}$ is unknown.
+    \item[Eventually Synchronous] No guarantees, protocol doesn't know if it is in a good period. 
+\end{description}
+
+\Exercise{2.1}
+LAC2AC protocol Figure 2.11. The disk and communication may not be used in the same activation. 
+To get at most once, the message must always be written to disk prior to outputting. \\
+
+\noindent
+Randomised approach - choose a random bit $b$:
+\begin{itemize}
+    \item[(b=0)] Write $(S,m)$ to disk; Output $(S,m)$
+    \item[(b=1)] Wait; Write $(S,m)$ to disk; Output $(S,m)$
+\end{itemize}
+Only fail to deliver if crashed between write and output, depending on bit this requires crashing after activation 1 (when $b=0$) or 2 (when $b=1$).
+
+\Exercise{2.2}
+For at least once, always output before writing to disk.
+\noindent
+Randomised approach - choose a random bit $b$:
+\begin{itemize}
+    \item[(b=0)] Output $(S,m)$; Write $(S,m)$ to disk
+    \item[(b=1)] Wait; Output $(S,m)$; Write $(S,m)$ to disk
+\end{itemize}
+To improve probability simply roll dice to choose number of waits.
+
+\Exercise{2.3}
+\begin{itemize}
+    \item Both disks: Keep sending from $S$. When $R$ receives write to disk (output), then acknowledge. 
+    When $S$ sees an acknowledgement it may delete the message.
+    \item Only disk of $R$: Keep sending from $S$. When $R$ receives write to disk, and acknowledge, $S$ may stop sending if acknowledged. $R$ can just ignore any received messages
+    \item $R$ must acknowledge and output on separate activations. It may always be crashed between these operations, resulting in no or multiple deliveries as $R$ cannot differentiate these cases.
+\end{itemize}
+
+\Exercise{2.4}
+$R$ must write something to disk before $S$ deletes from disk, otherwise the message would be lost if both crash. We may therefore assume there is a point where something is on both disks.
+\sebastian{Can we assume that only the messages are written to disk?}
+\begin{description}
+    \item[$R$ cleans up first]
+    Leaves the disks in the state they were prior to $R$ outputting, so if both crash they must deliver $m$ again.
+    \item[$S$ deletes first]  
+    If both crash and $m$ is sent again it will not be delivered, as the disks are now in the state they were in after delivery.
+\end{description}
+
+\newpage

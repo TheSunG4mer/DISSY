@@ -1,0 +1,44 @@
+\section{Week 45 - System Security Mechanisms}
+
+\Exercise{12.1}
+An answer is contained in the slides:
+\begin{enumerate}
+ \item Threats: social engineering, brute-force combination, vulnerabilities in the debugging interface (like no authentication or software exploits), eavesdropping the wireless interface, physical break-in.
+ \item Attack surface: wireless interface, debugging interface, touch screen, physical box, human operators, mobile app.
+ \item Security policy: no secrets in clear anywhere, no insecure interfaces, only users with the right combination can open the safe.
+ \item Mechanisms: TLS, memory-safe language for embedded firmware, longer combination, security training, multi-factor authentication.
+\end{enumerate}
+
+\Exercise{12.2}
+Open exercise, but here goes a example.
+\begin{itemize}
+\item Threats: students taking the test on behalf of other students, students using messaging apps to send/receive answers (instead of just consulting material), students printing answers for other students to pick up.
+\item Security Policy: only eligible students take the exam, without outside contributions to provide the answers.
+\item Mechanism: students identify themselves at the start of the exam, everything that is printed must contain the student identification, no access to LLMs that answers the questions directly or to messaging systems that could be used to share answers.
+\item TCB: student ID issued by the university, firewall with policy to block ChatGPT and other websites.
+\end{itemize}
+
+\Exercise{12.3}
+Several answers are admissible, here's an attempt:
+\begin{enumerate}
+ \item Heartbleed: Information disclosure, active attack (modification) by an external online network attacker, caused by failure in the mechanism.
+ \item SPECTRE: information disclosure or elevation of privilege, passive eavesdropping or active attack (depending on version), performed by online insider (user with execution privileges), incomplete threat model (like most side-channel attacks).
+ \item XSS: can be tampering, information disclosure or elevation of privilege; active attack by internal online network (user with some access to the database), most cases incomplete threat model.
+\end{enumerate}
+
+\Exercise{12.4}
+A secure version of heartbeat provides liveness/freshness. A simpler design fixing the length of the challenges to 128 random bits would prevent parsing errors and memory safety issues.
+
+\Exercise{12.5}
+The vulnerability in MitID fixed by QR codes was not binding the request and answer (swipe) in the login mechanism, allowing for identities to be spoofed. One can speculate that this was an incomplete threat model that did not take into account social engineering attacks. According to EINOO, this is an online attack by external users of the platform.
+
+\Exercise{12.6}
+This is an open question, allowing broad discussion. Items missing in the security policy:
+\begin{itemize}
+\item What is being protected is the voting system itself, with respect to eligibility requirements, voter authentication, privacy and ballot integrity. Notice that voter authentication and privacy are in tension with each other.
+\item The system must ensure correctness and verifiability of the final tally, and possibly the means for a voter to verify if his/her vote was cast as intended.
+\item In terms of mechanisms, the digital signatures can be used for voter authentication and ballot integrity, encryption and mixnets for voter privacy.
+\end{itemize}
+
+
+\newpage

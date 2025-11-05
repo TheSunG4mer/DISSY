@@ -1,0 +1,113 @@
+\section{Week 38 - Confidentiality}
+
+\subsection*{Exercises}
+5.2; 5.3; 5.4; 5.6; 5.8; 5.9; 5.10; 5.14; 5.5; 5.7
+
+\Exercise{5.2}
+Given ciphertexts $C_1$ and $C_2$:
+$$ C_1 = K \oplus M_1$$
+$$ C_2 = K \oplus M_2$$
+We can compute:
+\begin{align*}
+     C_1 \oplus C_2 &= (K \oplus M_1) \oplus (K \oplus M_2) \\
+     &= (K \oplus K )\oplus (M_1 \oplus M_2 )\\
+     &=  0 ~\oplus(M_1 \oplus M_2 )\\
+     & = M_1 \oplus M_2 
+\end{align*}
+We cannot derive each message on its own, if we knew one message we could find the other.
+\Exercise{5.3}
+One bit of our ciphertext is flipped, how does this affect the decrypted plaintext
+\begin{description}
+    \item[CBC] Flipping a bit changes the entire block the bit is in, and flips the bit in the same position in the block after.
+    \item[CTR]  Here there are two cases, if the bit is flipped in the IV the entire decryption will be wrong. If it is outside the IV it will only affect one position.
+\end{description}
+
+\Exercise{5.4}
+This is more an authenticity than a confidentiality problem. 
+
+Hiding the plaintext is of limited value if the ciphertext can just be replayed by the adversary to open the window.
+
+
+\Exercise{5.6}
+\begin{enumerate}
+    \item[2.] Let $K'$ run through all 56-bit DES keys and compute $C' = E_{K'}(M)$. Search for $C'$ in the table, if a match is found add $(K',K)$ to the set of possible keys, where $C' = D_K(C)$. This works because $C = E_{K'}(E_K(M))$.
+    Return all pairs of possible key pairs when done iterating over $K'$.
+    \note{For students that have not had the algorithms course it may not be clear that values in the table can be searched for efficiently.}
+\end{enumerate}
+The attack no longer works against triple-DES. If we make tables of all possible encryptions of $M$ and decryptions of $C$ we would have to try each key 56-bit $K'$, for every guess $K$ of $K_1$ to check if $E_{K'} (E_{K}(M)) = (D_{K}(C)) $ where $[E_{K}(M),D_{K}(C)]$ is the $K$-th row of our table. 
+
+\Exercise{5.8}
+The first observation that may be made is that characters are always encrypted to the same value. Just by looking at the ciphertext we may see that the second and last character are the same.
+Simple python script to encrypt each letter:
+\begin{lstlisting}[language=python]
+for c in range(0,26):
+    print(chr(97+c), c**25 % 18721)
+\end{lstlisting}
+The solution is "vanilla".\\
+
+\noindent
+(a, 0),
+(b, 1),
+(c, 6400),
+(d, 18718),
+(e, 17173),
+(f, 1759),
+(g, 18242),
+(h, 12359),
+(i, 14930),
+(j, 9),
+(k, 6279),
+(l, 2608),
+(m, 4644),
+(n, 4845),
+(o, 1375),
+(p, 13444),
+(q, 16),
+(r, 13663),
+(s, 1437),
+(t, 2940),
+(u, 10334),
+(v, 365),
+(w, 10789),
+(x, 8945),
+(y, 11373),
+(z, 5116)
+
+\note{It is worth mentioning that 0, 1 will always map to themselves}
+
+\Exercise{5.9}
+Encrypt $2^7 \mod 33 = 29$, decrypt
+$29^3 \mod 33 = 2$\\
+Encrypt $5^7 \mod 33 = 14$, decrypt
+$14^3 \mod 33 = 5$
+
+\Exercise{5.10}
+The challenge here is lies in how the bit-length of values changes as we operate on them. 
+A value $K$ may be represented in $\lceil \log_2 (K) \rceil$ bits. When we cube $K$ we then have a value which may be represented in $\lceil \log_2 (K^3) \rceil = \lceil 3 \log_2 (K) \rceil  \leq  3 \lceil \log_2 (K) \rceil $ bits. If this is less than the bit-length of the modulus we can be sure that no reduction has occurred, therefore we can just calculate the ordinary cube root to get $K$.
+
+For $K^{17} \mod n $ the bit-length of $ \log_2 (K^{17})  =  17 \log_2 (K) = 17 \cdot 128 =  2176$. This is only $26$ bits longer than the prime. Thus, roughly speaking, we only have to try all $x \in \{0,1\}^{26}$, $x \cdot n + (K^{17} \mod n)$ and take the 17th root, checking whether it is an integer.
+
+\Exercise{5.14}
+If we know the IV is just incremented for every call to the encryption oracle, if this starts at 0 and is then incremented to 1, we can simply flip the smallest bit of the first plaintext block, this will make the input to the first encryption box the same for $m_1$ and $m_2$
+
+\Exercise{5.5}
+Can test $10^{10}$ keys in a second\\
+\begin{tabular}{|c|c|}
+    \hline
+    Key bits & Time to crack \\
+    \hline
+    56 & 84 days\\
+    \hline
+    128 & $10^{26}$ years\\
+    \hline
+    192 & $2* 10^{40}$ years\\
+    \hline
+    256 & $3.7 * 10^{59}$ years\\
+    \hline
+\end{tabular}
+
+\Exercise{5.7}
+With a key for every permutation there would be $26!$ keys. This is significantly larger than $2^{56}$. ($26!$ is roughly 88 bits).
+
+Substitution allows frequency analysis which will quickly allow figuring out the key.
+\newpage
